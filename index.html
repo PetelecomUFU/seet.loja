@@ -404,7 +404,6 @@ function renderKits(){
       <div>
         <h4>${k.name}</h4>
         <ul class="kit-items">${k.items.map(i=>`<li>${i}</li>`).join('')}</ul>
-        <div class="kit-strategy">${k.strategy}</div>
       </div>
       <div class="kit-buy">
         <span class="now">${fmt(k.price)}</span>
