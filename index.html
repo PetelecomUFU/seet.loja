@@ -478,7 +478,7 @@ const fmt = v => 'R$ ' + v.toFixed(2).replace('.', ',');
 
 // >>> Número de WhatsApp que vai receber os pedidos, no formato DDI+DDD+número,
 // só dígitos, sem espaços, +, ( ) ou -. Exemplo para (34) 99999-9999: '5534999999999'.
-const WHATSAPP_NUMBER = 'COLE_O_NUMERO_AQUI';
+const WHATSAPP_NUMBER = '5534984272439';
 
 // ---------- CART ----------
 let cart = []; // {label, price, meta}
@@ -820,7 +820,7 @@ function submitOrder(){
     }
   }
 
-  if(!WHATSAPP_NUMBER || WHATSAPP_NUMBER.includes('COLE_O_NUMERO')){
+  if(!WHATSAPP_NUMBER || WHATSAPP_NUMBER.includes('5534984272439')){
     alert('O número de WhatsApp da loja ainda não foi configurado. Avise o responsável pelo site.');
     return;
   }
