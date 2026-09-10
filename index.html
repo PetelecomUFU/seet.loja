@@ -6,7 +6,6 @@
 <title>Loja da SEET - UFU</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@600;700;800&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 :root{
   --navy: #3B82F6;
@@ -357,10 +356,8 @@ footer{padding:40px 24px 60px; text-align:center; color:var(--ink-soft); font-si
       </div>
     </div>
     <div class="cf-group">
-      <label for="custComprovante">Comprovante de pagamento (obrigatório)</label>
-      <input type="file" id="custComprovante" accept="image/*,application/pdf">
-      <div class="cf-hint">Anexe o print ou PDF do comprovante (PIX/transferência). Máx. 5MB.</div>
-      <div class="cf-file-name" id="comprovantePreview"></div>
+      <label>Comprovante de pagamento</label>
+      <div class="cf-hint">⚠️ Depois de clicar em "Confirmar e enviar no WhatsApp", uma conversa vai abrir com o pedido já preenchido. <strong>Anexe o print ou PDF do comprovante diretamente naquela conversa</strong> antes de enviar — o site não consegue anexar o arquivo automaticamente.</div>
     </div>
     <div class="cf-group" id="moletomGroup" style="display:none;">
       <label>Quer estampar um nome no moletom?</label>
@@ -385,7 +382,7 @@ footer{padding:40px 24px 60px; text-align:center; color:var(--ink-soft); font-si
     </div>
     <div class="cf-btn-row" id="formFootBtns" style="display:none;">
       <button class="checkout-btn secondary" onclick="backToCart()">Voltar</button>
-      <button class="checkout-btn" id="submitOrderBtn" onclick="submitOrder()">Confirmar e enviar</button>
+      <button class="checkout-btn" id="submitOrderBtn" onclick="submitOrder()">Confirmar e enviar no WhatsApp</button>
     </div>
   </div>
 </div>
@@ -418,10 +415,10 @@ const PRODUCTS = [
   {id:'engenharia', name:'Camiseta Engenharia', price:60, img:PRODUCT_IMAGES.engenharia, shirtType:'camiseta', babyLook:true},
   {id:'personalizada', name:'Camiseta Personalizada', price:60, img:PRODUCT_IMAGES.personalizada, shirtType:'camiseta'},
   {id:'caneca', name:'Caneca', price:25, img:PRODUCT_IMAGES.caneca},
-  {id:'moletom', name:'Moletom Telecom', price:180, img:PRODUCT_IMAGES.moletom1, shirtType:'encomenda'},
-  {id:'moletom', name:'Moletom Controle e Automação', price:180, img:PRODUCT_IMAGES.moletom2, shirtType:'encomenda'},
-  {id:'moletom', name:'Moletom Computação', price:180, img:PRODUCT_IMAGES.moletom3, shirtType:'encomenda'},
-  {id:'moletom', name:'Moletom Elétrica', price:180, img:PRODUCT_IMAGES.moletom4, shirtType:'encomenda'}
+  {id:'moletom1', name:'Moletom Telecom', price:180, img:PRODUCT_IMAGES.moletom1, shirtType:'encomenda'},
+  {id:'moletom2', name:'Moletom Controle e Automação', price:180, img:PRODUCT_IMAGES.moletom2, shirtType:'encomenda'},
+  {id:'moletom3', name:'Moletom Computação', price:180, img:PRODUCT_IMAGES.moletom3, shirtType:'encomenda'},
+  {id:'moletom4', name:'Moletom Elétrica', price:180, img:PRODUCT_IMAGES.moletom4, shirtType:'encomenda'}
 ];
 
 const KITS = [
@@ -444,10 +441,17 @@ const KITS = [
 ];
 
 const CASCADE_DISCOUNT = 5;
-const MOLETOM_LABEL = 'Moletom Telecom',
-const MOLETOM_LABEL = 'Moletom Controle e Automação',
-const MOLETOM_LABEL = 'Moletom Computação',
-const MOLETOM_LABEL = 'Moletom Elétrica';
+
+// >>> CORRIGIDO: as 4 labels de moletom agora vivem juntas em um único array,
+// e uma única função de verificação cobre todos eles. Isso evita que a
+// exibição da pergunta "quer estampar nome?" dependa de qual moletom foi o
+// último a ser checado.
+const MOLETOM_LABELS = [
+  'Moletom Telecom',
+  'Moletom Controle e Automação',
+  'Moletom Computação',
+  'Moletom Elétrica'
+];
 
 // ---------- SHIRT / MOLETOM SIZE CONFIG ----------
 // Para cada kit fixo que inclui camiseta, quais modelos ela pode escolher (somente os do respectivo kit).
@@ -472,17 +476,9 @@ const SIZE_SETS = {
 const PAYMENT_LINK = '00020126440014br.gov.bcb.pix0122petelecomufu@gmail.com5204000053039865802BR5925GABRIEL INACIO DE ALMEIDA6009Sao Paulo62290525REC6AA07FAC66DBC5001778556304BD8E';
 const fmt = v => 'R$ ' + v.toFixed(2).replace('.', ',');
 
-// >>> Cole aqui a URL e a chave "anon" (pública) do seu projeto Supabase.
-// Painel do Supabase → Project Settings → API.
-// A chave "anon" é feita para ficar exposta no front-end — a segurança fica nas
-// políticas de RLS (Row Level Security) criadas junto com as tabelas.
-const SUPABASE_URL = 'https://SEU-PROJETO.supabase.co';
-const SUPABASE_ANON_KEY = 'SUA_CHAVE_ANON_AQUI';
-const COMPROVANTES_BUCKET = 'comprovantes';
-
-const supabaseClient = (SUPABASE_URL.startsWith('http') && !SUPABASE_URL.includes('SEU-PROJETO'))
-  ? supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
-  : null;
+// >>> Número de WhatsApp que vai receber os pedidos, no formato DDI+DDD+número,
+// só dígitos, sem espaços, +, ( ) ou -. Exemplo para (34) 99999-9999: '5534999999999'.
+const WHATSAPP_NUMBER = 'COLE_O_NUMERO_AQUI';
 
 // ---------- CART ----------
 let cart = []; // {label, price, meta}
@@ -513,9 +509,12 @@ function removeFromCart(idx){
   cart.splice(idx,1);
   renderCart();
 }
+
+// >>> CORRIGIDO: uma única função cobre qualquer um dos 4 moletons.
 function cartHasMoletom(){
-  return cart.some(c => c.label === MOLETOM_LABEL);
+  return cart.some(c => MOLETOM_LABELS.includes(c.label));
 }
+
 function renderCart(){
   document.getElementById('cartCount').textContent = cart.length;
   const wrap = document.getElementById('drawerItems');
@@ -653,6 +652,7 @@ function goToCheckout(){
   document.getElementById('formFootBtns').style.display = 'flex';
   document.getElementById('drawerTitle').textContent = 'Finalizar pedido';
 
+  // >>> CORRIGIDO: uma única verificação, cobrindo qualquer moletom no carrinho.
   document.getElementById('moletomGroup').style.display = cartHasMoletom() ? 'block' : 'none';
 
   const summary = document.getElementById('cfSummary');
@@ -791,26 +791,12 @@ document.addEventListener('input', (e)=>{
   }
 });
 
-document.addEventListener('change', (e)=>{
-  if(e.target && e.target.id === 'custComprovante'){
-    const f = e.target.files[0];
-    const preview = document.getElementById('comprovantePreview');
-    preview.textContent = f ? `Selecionado: ${f.name} (${(f.size/1024/1024).toFixed(2)} MB)` : '';
-  }
-});
-
-const MAX_COMPROVANTE_SIZE = 5 * 1024 * 1024; // 5MB
-
-async function submitOrder(){
+function submitOrder(){
   const nome = document.getElementById('custName').value.trim();
   const cpf = document.getElementById('custCPF').value.trim();
-  const comprovanteInput = document.getElementById('custComprovante');
-  const comprovanteFile = comprovanteInput.files[0];
 
   if(!nome){ alert('Preencha seu nome completo.'); return; }
   if(cpf.replace(/\D/g,'').length !== 11){ alert('Preencha um CPF válido.'); return; }
-  if(!comprovanteFile){ alert('Anexe o comprovante de pagamento antes de enviar.'); return; }
-  if(comprovanteFile.size > MAX_COMPROVANTE_SIZE){ alert('O comprovante deve ter no máximo 5MB.'); return; }
   if(!document.getElementById('confirmItems').checked){
     alert('Confirme os itens do pedido antes de enviar.');
     return;
@@ -822,6 +808,7 @@ async function submitOrder(){
     return;
   }
 
+  // Uma única checagem cobrindo qualquer um dos 4 moletons, sem repetição.
   let moletomPedido = '';
   let moletomNome = '';
   if(cartHasMoletom()){
@@ -833,85 +820,49 @@ async function submitOrder(){
     }
   }
 
-  if(!supabaseClient){
-    alert('A conexão com o banco de dados ainda não foi configurada. Avise o responsável pelo site.');
+  if(!WHATSAPP_NUMBER || WHATSAPP_NUMBER.includes('COLE_O_NUMERO')){
+    alert('O número de WhatsApp da loja ainda não foi configurado. Avise o responsável pelo site.');
     return;
   }
 
-  const itensTexto = cart.map(c => `${c.label}${c.meta ? ' ('+c.meta+')' : ''} — ${fmt(c.price)}`).join(' | ');
+  const itensTexto = cart.map(c => `• ${c.label}${c.meta ? ' ('+c.meta+')' : ''} — ${fmt(c.price)}`).join('\n');
   const total = cart.reduce((s,c)=>s+c.price,0);
 
-  const submitBtn = document.getElementById('submitOrderBtn');
-  const originalLabel = submitBtn ? submitBtn.textContent : '';
-  if(submitBtn){ submitBtn.disabled = true; submitBtn.textContent = 'Enviando...'; }
-
-  try{
-    // ---- 1) sobe o comprovante para o Supabase Storage ----
-    const ext = (comprovanteFile.name.split('.').pop() || 'bin').toLowerCase();
-    const caminhoArquivo = `${cpf.replace(/\D/g,'')}/${Date.now()}.${ext}`;
-
-    const { error: uploadError } = await supabaseClient
-      .storage
-      .from(COMPROVANTES_BUCKET)
-      .upload(caminhoArquivo, comprovanteFile, { contentType: comprovanteFile.type, upsert: false });
-
-    if(uploadError) throw uploadError;
-
-    // ---- 2) grava o pedido na tabela "pedidos" ----
-    const { data: pedidoInserido, error: pedidoError } = await supabaseClient
-      .from('pedidos')
-      .insert({
-        nome_cliente: nome,
-        cpf: cpf,
-        itens_resumo: itensTexto,
-        camisetas_tamanhos: shirtSel.text,
-        total: total,
-        moletom_pedido: moletomPedido,
-        moletom_nome: moletomNome,
-        comprovante_path: caminhoArquivo,
-        comprovante_nome: comprovanteFile.name,
-        status: 'pendente'
-      })
-      .select()
-      .single();
-
-    if(pedidoError) throw pedidoError;
-
-    // ---- 3) grava cada item do carrinho em "pedido_itens", ligado ao pedido acima ----
-    const linhasItens = cart.map(c => ({
-      pedido_id: pedidoInserido.id,
-      label: c.label,
-      price: c.price,
-      meta: c.meta || null
-    }));
-
-    const { error: itensError } = await supabaseClient.from('pedido_itens').insert(linhasItens);
-    if(itensError) throw itensError;
-
-    alert('Pedido enviado com sucesso! Obrigado.');
-
-    // ---- reset ----
-    cart = [];
-    renderCart();
-    document.getElementById('custName').value = '';
-    document.getElementById('custCPF').value = '';
-    document.getElementById('confirmItems').checked = false;
-    comprovanteInput.value = '';
-    document.getElementById('comprovantePreview').textContent = '';
-    const naoRadio = document.querySelector('input[name=moletomChoice][value=nao]');
-    if(naoRadio) naoRadio.checked = true;
-    document.getElementById('moletomNome').value = '';
-    document.getElementById('moletomNome').style.display = 'none';
-    document.getElementById('shirtSizesList').innerHTML = '';
-    document.getElementById('shirtSizesGroup').style.display = 'none';
-    backToCart();
-    closeDrawer();
-  } catch(err){
-    console.error('Erro ao enviar pedido:', err);
-    alert('Não foi possível enviar o pedido agora. Verifique sua conexão e tente novamente.\n' + (err && err.message ? err.message : ''));
-  } finally {
-    if(submitBtn){ submitBtn.disabled = false; submitBtn.textContent = originalLabel || 'Confirmar e enviar'; }
+  // ---- monta a mensagem para o WhatsApp ----
+  let msg = `*Novo pedido - Loja da SEET*\n\n`;
+  msg += `*Nome:* ${nome}\n`;
+  msg += `*CPF:* ${cpf}\n\n`;
+  msg += `*Itens:*\n${itensTexto}\n\n`;
+  if(shirtSel.text){
+    msg += `*Modelos/tamanhos:*\n${shirtSel.text}\n\n`;
   }
+  if(moletomPedido){
+    msg += `*Estampar nome no moletom:* ${moletomPedido}`;
+    if(moletomPedido === 'Sim'){ msg += ` (${moletomNome})`; }
+    msg += `\n\n`;
+  }
+  msg += `*Total:* ${fmt(total)}\n\n`;
+  msg += `⚠️ Comprovante de pagamento em anexo nesta conversa.`;
+
+  const whatsappUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`;
+  window.open(whatsappUrl, '_blank');
+
+  alert('Pedido pronto! O WhatsApp vai abrir com o resumo — não esqueça de anexar o comprovante de pagamento na conversa antes de enviar.');
+
+  // ---- reset ----
+  cart = [];
+  renderCart();
+  document.getElementById('custName').value = '';
+  document.getElementById('custCPF').value = '';
+  document.getElementById('confirmItems').checked = false;
+  const naoRadio = document.querySelector('input[name=moletomChoice][value=nao]');
+  if(naoRadio) naoRadio.checked = true;
+  document.getElementById('moletomNome').value = '';
+  document.getElementById('moletomNome').style.display = 'none';
+  document.getElementById('shirtSizesList').innerHTML = '';
+  document.getElementById('shirtSizesGroup').style.display = 'none';
+  backToCart();
+  closeDrawer();
 }
 
 // ---------- INIT ----------
