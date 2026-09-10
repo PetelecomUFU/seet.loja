@@ -229,6 +229,12 @@ section.block{padding:32px 24px 8px; max-width:1080px; margin:0 auto;}
   font-family:'Inter', sans-serif; font-weight:700; font-size:13.5px; padding:10px 20px; border-radius:999px;
 }
 .cf-pay-link:hover{filter:brightness(1.08);}
+.cf-pay-link[disabled]{opacity:0.6; cursor:default;}
+.cf-pix-code{
+  font-family:'Inter', sans-serif; font-size:12px; color:var(--ink); background:var(--paper);
+  border:1px solid var(--line-soft); border-radius:var(--radius-sm); padding:10px 12px; margin-bottom:12px;
+  word-break:break-all; line-height:1.5; user-select:all; cursor:text;
+}
 .cf-radio-row{display:flex; gap:18px; font-family:'Inter', sans-serif; font-size:13px; color:var(--ink);}
 .cf-radio-row label{display:flex; align-items:center; gap:6px; cursor:pointer; text-transform:none; font-size:13px; color:var(--ink); margin:0; letter-spacing:0;}
 .cf-radio-row input{width:15px; height:15px; accent-color:var(--navy);}
@@ -349,10 +355,11 @@ footer{padding:40px 24px 60px; text-align:center; color:var(--ink-soft); font-si
       <div id="shirtSizesList"></div>
     </div>
     <div class="cf-group">
-      <label>Pagamento</label>
+      <label>Pagamento (PIX)</label>
       <div class="cf-pay-box">
-        <p>Clique no botão abaixo para pagar o valor total do pedido. Depois de pagar, anexe o comprovante logo abaixo.</p>
-        <a class="cf-pay-link" id="payLink" href="#" target="_blank" rel="noopener">Pagar agora</a>
+        <p>Copie o código Pix abaixo e cole no app do seu banco para pagar o valor total do pedido. Depois, anexe o comprovante na conversa do WhatsApp.</p>
+        <div class="cf-pix-code" id="pixCode"></div>
+        <button type="button" class="cf-pay-link" id="pixCopyBtn" onclick="copyPixCode()">Copiar código Pix</button>
       </div>
     </div>
     <div class="cf-group">
@@ -643,6 +650,21 @@ function addCustomKit(){
 }
 
 // ---------- CHECKOUT FLOW ----------
+async function copyPixCode(){
+  const btn = document.getElementById('pixCopyBtn');
+  try{
+    await navigator.clipboard.writeText(PAYMENT_LINK);
+    if(btn){
+      const original = btn.textContent;
+      btn.textContent = 'Copiado!';
+      btn.disabled = true;
+      setTimeout(() => { btn.textContent = original; btn.disabled = false; }, 2000);
+    }
+  } catch(err){
+    alert('Não foi possível copiar automaticamente. Selecione o código acima e copie manualmente.');
+  }
+}
+
 function goToCheckout(){
   if(cart.length === 0) return;
 
@@ -660,7 +682,7 @@ function goToCheckout(){
 
   buildShirtSizesSection();
 
-  document.getElementById('payLink').href = PAYMENT_LINK;
+  document.getElementById('pixCode').textContent = PAYMENT_LINK;
 }
 
 // ---------- SHIRT / MOLETOM SIZE SECTION (fluxo adaptativo) ----------
