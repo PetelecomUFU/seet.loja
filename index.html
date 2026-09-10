@@ -6,201 +6,256 @@
 <title>Loja da SEET - UFU</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
-  :root{
-    --navy: #3B82F6;              /* acento sólido (era amarelo, agora azul) */
-    --navy-deep: #2563EB;         /* acento sólido — hover */
-    --line: #57ABFF;              /* azul de labels / tags / eyebrow */
-    --line-soft: rgba(87,171,255,0.22);
-    --paper: #101F35;             /* painel escuro (cards, drawer, breakdown) */
-    --paper-dim: #16283F;         /* divisores e chips dentro dos painéis */
-    --ink: #F3F7FC;               /* texto claro sobre painel escuro */
-    --ink-soft: #93A7BE;          /* texto secundário */
-    --amber: #3FD0FF;             /* topo do degradê do CTA */
-    --amber-deep: #04101F;        /* texto escuro sobre botões em degradê */
-    --danger: #FF6B81;
-    --radius: 14px;
-    --radius-sm: 10px;
-    --accent-grad: linear-gradient(90deg, #2E6EF0, #3FD0FF);
-  }
-  *{box-sizing:border-box;}
-  html{scroll-behavior:smooth;}
-  body{
-    margin:0;
-    background:#04070D;
-    color:var(--ink);
-    font-family:'Inter', sans-serif;
-    -webkit-font-smoothing:antialiased;
-  }
-  #bgCanvas{position:fixed; inset:0; width:100%; height:100%; z-index:-1; display:block;}
-  .mono{font-family:'Inter', sans-serif; font-variant-numeric:tabular-nums;}
-  a{color:inherit;}
+:root{
+  --navy: #3B82F6;
+  --navy-deep: #2563EB;
+  --line: #57ABFF;
+  --line-soft: rgba(87,171,255,0.22);
+  --paper: #101F35;
+  --paper-dim: #16283F;
+  --ink: #F3F7FC;
+  --ink-soft: #93A7BE;
+  --amber: #3FD0FF;
+  --amber-deep: #04101F;
+  --danger: #FF6B81;
+  --radius: 14px;
+  --radius-sm: 10px;
+  --accent-grad: linear-gradient(90deg, #2E6EF0, #3FD0FF);
+}
+*{box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{
+  margin:0;
+  background:#04070D;
+  color:var(--ink);
+  font-family:'Inter', sans-serif;
+  -webkit-font-smoothing:antialiased;
+}
+#bgCanvas{position:fixed; inset:0; width:100%; height:100%; z-index:-1; display:block;}
+.mono{font-family:'Inter', sans-serif; font-variant-numeric:tabular-nums;}
+a{color:inherit;}
 
-  /* ---- Header ---- */
-  header{
-    padding:22px 24px 18px;
-    border-bottom:1px solid var(--line-soft);
-    display:flex; align-items:flex-start; justify-content:space-between; gap:16px;
-    position:sticky; top:0; z-index:40;
-    background:rgba(6,11,20,0.85);
-    backdrop-filter:blur(8px);
-  }
-  .brand{display:flex; flex-direction:column; gap:2px;}
-  .brand .mark{
-    font-size:11px; letter-spacing:0.12em; color:var(--line); font-family:'Inter', sans-serif; font-weight:600; text-transform:uppercase;
-  }
-  .brand h1{margin:0; font-size:22px; font-weight:800; line-height:1.15; font-family:'Poppins', sans-serif;}
-  .brand h1 span{color:var(--line);}
-  .cart-btn{
-    background:var(--accent-grad); color:var(--amber-deep); border:none; border-radius:999px;
-    padding:10px 18px; font-family:'Inter', sans-serif; font-weight:700; font-size:13px;
-    cursor:pointer; white-space:nowrap; display:flex; align-items:center; gap:8px;
-    box-shadow:0 6px 20px rgba(59,130,246,0.35);
-    transition:filter .15s ease;
-  }
-  .cart-btn:hover{filter:brightness(1.08);}
-  .cart-count{
-    background:var(--amber-deep); color:#8FD9FF; border-radius:50%; width:20px; height:20px;
-    display:inline-flex; align-items:center; justify-content:center; font-size:11px;
-  }
+/* ---- Header ---- */
+header{
+  padding:22px 24px 18px;
+  border-bottom:1px solid var(--line-soft);
+  display:flex; align-items:flex-start; justify-content:space-between; gap:16px;
+  position:sticky; top:0; z-index:40;
+  background:rgba(6,11,20,0.85);
+  backdrop-filter:blur(8px);
+}
+.brand{display:flex; flex-direction:column; gap:2px;}
+.brand .mark{
+  font-size:11px; letter-spacing:0.12em; color:var(--line); font-family:'Inter', sans-serif; font-weight:600; text-transform:uppercase;
+}
+.brand h1{margin:0; font-size:22px; font-weight:800; line-height:1.15; font-family:'Poppins', sans-serif;}
+.brand h1 span{color:var(--line);}
+.cart-btn{
+  background:var(--accent-grad); color:var(--amber-deep); border:none; border-radius:999px;
+  padding:10px 18px; font-family:'Inter', sans-serif; font-weight:700; font-size:13px;
+  cursor:pointer; white-space:nowrap; display:flex; align-items:center; gap:8px;
+  box-shadow:0 6px 20px rgba(59,130,246,0.35);
+  transition:filter .15s ease;
+}
+.cart-btn:hover{filter:brightness(1.08);}
+.cart-count{
+  background:var(--amber-deep); color:#8FD9FF; border-radius:50%; width:20px; height:20px;
+  display:inline-flex; align-items:center; justify-content:center; font-size:11px;
+}
 
-  /* ---- Hero ---- */
-  .hero{
-    padding:56px 24px 40px; max-width:760px;
-  }
-  .hero .eyebrow{
-    font-family:'Inter', sans-serif; font-size:12px; color:var(--line);
-    border:1px solid var(--line-soft); display:inline-block; padding:5px 14px; border-radius:999px;
-    margin-bottom:18px; background:rgba(87,171,255,0.06);
-  }
-  .hero h2{
-    font-size:clamp(32px, 6vw, 52px); line-height:1.05; margin:0 0 16px; font-weight:800;
-    font-family:'Poppins', sans-serif;
-  }
-  .hero p{font-size:16px; color:var(--ink-soft); max-width:52ch; line-height:1.6; margin:0;}
+/* ---- Hero ---- */
+.hero{padding:56px 24px 40px; max-width:760px;}
+.hero .eyebrow{
+  font-family:'Inter', sans-serif; font-size:12px; color:var(--line);
+  border:1px solid var(--line-soft); display:inline-block; padding:5px 14px; border-radius:999px;
+  margin-bottom:18px; background:rgba(87,171,255,0.06);
+}
+.hero h2{
+  font-size:clamp(32px, 6vw, 52px); line-height:1.05; margin:0 0 16px; font-weight:800;
+  font-family:'Poppins', sans-serif;
+}
+.hero p{font-size:16px; color:var(--ink-soft); max-width:52ch; line-height:1.6; margin:0;}
 
-  /* ---- Section shell ---- */
-  section.block{padding:32px 24px 8px; max-width:1080px; margin:0 auto;}
-  .block-head{
-    display:flex; align-items:baseline; justify-content:space-between; gap:12px;
-    border-bottom:1px solid var(--line-soft); padding-bottom:10px; margin-bottom:22px;
-  }
-  .block-head h3{font-size:20px; margin:0; font-weight:700; font-family:'Poppins', sans-serif;}
-  .block-head .tag{font-family:'Inter', sans-serif; font-size:12px; color:var(--line); letter-spacing:0.04em;}
+/* ---- Section shell ---- */
+section.block{padding:32px 24px 8px; max-width:1080px; margin:0 auto;}
+.block-head{
+  display:flex; align-items:baseline; justify-content:space-between; gap:12px;
+  border-bottom:1px solid var(--line-soft); padding-bottom:10px; margin-bottom:22px;
+}
+.block-head h3{font-size:20px; margin:0; font-weight:700; font-family:'Poppins', sans-serif;}
+.block-head .tag{font-family:'Inter', sans-serif; font-size:12px; color:var(--line); letter-spacing:0.04em;}
 
-  /* ---- Catalog grid ---- */
-  .grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); gap:14px; margin-bottom:8px;}
-  .card{
-    background:var(--paper); color:var(--ink); border-radius:var(--radius);
-    padding:16px; display:flex; flex-direction:column; gap:10px;
-    border:1px solid var(--line-soft);
-    box-shadow:0 8px 24px rgba(0,0,0,0.35);
-    overflow:hidden;
-  }
-  .card .thumb{
-    margin:-16px -16px 0; aspect-ratio:4/5; background:var(--paper-dim);
-    border-bottom:1px solid var(--line-soft); display:flex; align-items:center; justify-content:center;
-    overflow:hidden;
-  }
-  .card .thumb img{width:100%; height:100%; object-fit:cover; display:block;}
-  .card .thumb-empty{
-    font-family:'Inter', sans-serif; font-size:11px; color:var(--ink-soft); letter-spacing:0.06em;
-    text-transform:uppercase;
-  }
-  .card .name{font-weight:600; font-size:15px; line-height:1.3;}
-  .card .meta{font-family:'Inter', sans-serif; font-size:11px; color:var(--ink-soft); text-transform:none;}
-  .card .price-row{display:flex; align-items:center; justify-content:space-between; margin-top:auto;}
-  .card .price{font-family:'Inter', sans-serif; font-weight:700; font-size:17px; color:var(--ink);}
-  .add-btn{
-    background:var(--navy); color:#fff; border:none; border-radius:var(--radius-sm);
-    padding:8px 12px; font-family:'Inter', sans-serif; font-weight:600; font-size:12px; cursor:pointer;
-    transition:background .15s ease;
-  }
-  .add-btn:hover{background:var(--navy-deep);}
+/* ---- Catalog grid ---- */
+.grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); gap:14px; margin-bottom:8px;}
+.card{
+  background:var(--paper); color:var(--ink); border-radius:var(--radius);
+  padding:16px; display:flex; flex-direction:column; gap:10px;
+  border:1px solid var(--line-soft);
+  box-shadow:0 8px 24px rgba(0,0,0,0.35);
+  overflow:hidden;
+}
+.card .thumb{
+  margin:-16px -16px 0; aspect-ratio:4/5; background:var(--paper-dim);
+  border-bottom:1px solid var(--line-soft); display:flex; align-items:center; justify-content:center;
+  overflow:hidden;
+}
+.card .thumb img{width:100%; height:100%; object-fit:cover; display:block;}
+.card .thumb-empty{
+  font-family:'Inter', sans-serif; font-size:11px; color:var(--ink-soft); letter-spacing:0.06em;
+  text-transform:uppercase;
+}
+.card .name{font-weight:600; font-size:15px; line-height:1.3;}
+.card .meta{font-family:'Inter', sans-serif; font-size:11px; color:var(--ink-soft); text-transform:none;}
+.card .price-row{display:flex; align-items:center; justify-content:space-between; margin-top:auto;}
+.card .price{font-family:'Inter', sans-serif; font-weight:700; font-size:17px; color:var(--ink);}
+.add-btn{
+  background:var(--navy); color:#fff; border:none; border-radius:var(--radius-sm);
+  padding:8px 12px; font-family:'Inter', sans-serif; font-weight:600; font-size:12px; cursor:pointer;
+  transition:background .15s ease;
+}
+.add-btn:hover{background:var(--navy-deep);}
 
-  /* ---- Kits ---- */
-  .kit-card{
-    background:var(--paper); color:var(--ink); border-radius:var(--radius);
-    padding:20px; margin-bottom:16px; display:grid; grid-template-columns:1fr auto; gap:18px; align-items:start;
-    border:1px solid var(--line-soft); border-left:4px solid var(--navy);
-    box-shadow:0 8px 24px rgba(0,0,0,0.35);
-  }
-  .kit-card h4{margin:0 0 6px; font-size:17px; font-weight:700; font-family:'Poppins', sans-serif;}
-  .kit-card .sub{font-size:13px; color:var(--ink-soft); margin-bottom:10px;}
-  .kit-items{list-style:none; margin:0 0 10px; padding:0; display:flex; flex-wrap:wrap; gap:6px;}
-  .kit-items li{
-    font-family:'Inter', sans-serif; font-size:11.5px; background:var(--paper-dim); color:var(--ink-soft);
-    padding:4px 10px; border-radius:999px; border:1px solid var(--line-soft);
-  }
-  .kit-strategy{font-size:12.5px; color:var(--ink-soft); font-style:italic; max-width:56ch;}
-  .kit-buy{display:flex; flex-direction:column; align-items:flex-end; gap:8px; min-width:120px;}
-  .kit-buy .old{font-family:'Inter', sans-serif; font-size:12px; color:var(--ink-soft); text-decoration:line-through;}
-  .kit-buy .now{font-family:'Inter', sans-serif; font-size:22px; font-weight:800; color:var(--ink);}
+/* ---- Kits ---- */
+.kit-card{
+  background:var(--paper); color:var(--ink); border-radius:var(--radius);
+  padding:20px; margin-bottom:16px; display:grid; grid-template-columns:1fr auto; gap:18px; align-items:start;
+  border:1px solid var(--line-soft); border-left:4px solid var(--navy);
+  box-shadow:0 8px 24px rgba(0,0,0,0.35);
+}
+.kit-card h4{margin:0 0 6px; font-size:17px; font-weight:700; font-family:'Poppins', sans-serif;}
+.kit-card .sub{font-size:13px; color:var(--ink-soft); margin-bottom:10px;}
+.kit-items{list-style:none; margin:0 0 10px; padding:0; display:flex; flex-wrap:wrap; gap:6px;}
+.kit-items li{
+  font-family:'Inter', sans-serif; font-size:11.5px; background:var(--paper-dim); color:var(--ink-soft);
+  padding:4px 10px; border-radius:999px; border:1px solid var(--line-soft);
+}
+.kit-strategy{font-size:12.5px; color:var(--ink-soft); font-style:italic; max-width:56ch;}
+.kit-buy{display:flex; flex-direction:column; align-items:flex-end; gap:8px; min-width:120px;}
+.kit-buy .old{font-family:'Inter', sans-serif; font-size:12px; color:var(--ink-soft); text-decoration:line-through;}
+.kit-buy .now{font-family:'Inter', sans-serif; font-size:22px; font-weight:800; color:var(--ink);}
 
-  @media (max-width:640px){
-    .kit-card{grid-template-columns:1fr;}
-    .kit-buy{align-items:flex-start;}
-  }
+@media (max-width:640px){
+  .kit-card{grid-template-columns:1fr;}
+  .kit-buy{align-items:flex-start;}
+}
 
-  /* ---- Builder ---- */
-  .builder{
-    background:var(--paper); color:var(--ink); border-radius:var(--radius); padding:20px;
-    border:1px solid var(--line-soft);
-  }
-  .builder-rules{
-    font-family:'Inter', sans-serif; font-size:11.5px; color:var(--ink-soft);
-    border:1px dashed #2B4C74; background:var(--paper-dim); padding:10px 12px; border-radius:var(--radius-sm); margin-bottom:18px; line-height:1.6;
-  }
-  .builder-grid{display:grid; grid-template-columns:1fr 1fr; gap:24px;}
-  @media (max-width:720px){.builder-grid{grid-template-columns:1fr;}}
-  .pick-list label{
-    display:flex; align-items:center; gap:10px; padding:9px 4px; border-bottom:1px solid var(--paper-dim);
-    font-size:14px; cursor:pointer;
-  }
-  .pick-list .p-thumb{
-    width:30px; height:30px; border-radius:6px; overflow:hidden; flex:none;
-    background:var(--paper-dim); border:1px solid var(--line-soft);
-  }
-  .pick-list .p-thumb img{width:100%; height:100%; object-fit:cover; display:block;}
-  .pick-list label input{width:16px; height:16px; accent-color:var(--navy);}
-  .pick-list .p-price{margin-left:auto; font-family:'Inter', sans-serif; font-size:13px; color:var(--ink-soft);}
-  .pick-list .addon-flag{font-family:'Inter', sans-serif; font-size:10px; color:var(--line); border:1px solid var(--line); padding:2px 8px; border-radius:999px; margin-left:6px;}
+/* ---- Builder ---- */
+.builder{
+  background:var(--paper); color:var(--ink); border-radius:var(--radius); padding:20px;
+  border:1px solid var(--line-soft);
+}
+.builder-rules{
+  font-family:'Inter', sans-serif; font-size:11.5px; color:var(--ink-soft);
+  border:1px dashed #2B4C74; background:var(--paper-dim); padding:10px 12px; border-radius:var(--radius-sm); margin-bottom:18px; line-height:1.6;
+}
+.builder-grid{display:grid; grid-template-columns:1fr 1fr; gap:24px;}
+@media (max-width:720px){.builder-grid{grid-template-columns:1fr;}}
+.pick-list label{
+  display:flex; align-items:center; gap:10px; padding:9px 4px; border-bottom:1px solid var(--paper-dim);
+  font-size:14px; cursor:pointer;
+}
+.pick-list .p-thumb{
+  width:30px; height:30px; border-radius:6px; overflow:hidden; flex:none;
+  background:var(--paper-dim); border:1px solid var(--line-soft);
+}
+.pick-list .p-thumb img{width:100%; height:100%; object-fit:cover; display:block;}
+.pick-list label input{width:16px; height:16px; accent-color:var(--navy);}
+.pick-list .p-price{margin-left:auto; font-family:'Inter', sans-serif; font-size:13px; color:var(--ink-soft);}
+.pick-list .addon-flag{font-family:'Inter', sans-serif; font-size:10px; color:var(--line); border:1px solid var(--line); padding:2px 8px; border-radius:999px; margin-left:6px;}
 
-  .breakdown{background:var(--paper-dim); color:var(--ink); border-radius:var(--radius); padding:16px; align-self:start; border:1px solid var(--line-soft);}
-  .breakdown h5{margin:0 0 12px; font-size:12px; font-family:'Inter', sans-serif; color:var(--line); font-weight:600; letter-spacing:0.08em; text-transform:uppercase;}
-  .b-line{display:flex; justify-content:space-between; font-size:13.5px; padding:5px 0; border-bottom:1px solid rgba(255,255,255,0.08);}
-  .b-line .off{color:#6FE3A8;}
-  .b-total{display:flex; justify-content:space-between; margin-top:10px; padding-top:10px; border-top:1px solid var(--line-soft); font-family:'Inter', sans-serif; font-size:18px; font-weight:700;}
-  .empty-note{font-size:13px; color:var(--ink-soft); padding:8px 0;}
+.breakdown{background:var(--paper-dim); color:var(--ink); border-radius:var(--radius); padding:16px; align-self:start; border:1px solid var(--line-soft);}
+.breakdown h5{margin:0 0 12px; font-size:12px; font-family:'Inter', sans-serif; color:var(--line); font-weight:600; letter-spacing:0.08em; text-transform:uppercase;}
+.b-line{display:flex; justify-content:space-between; font-size:13.5px; padding:5px 0; border-bottom:1px solid rgba(255,255,255,0.08);}
+.b-line .off{color:#6FE3A8;}
+.b-total{display:flex; justify-content:space-between; margin-top:10px; padding-top:10px; border-top:1px solid var(--line-soft); font-family:'Inter', sans-serif; font-size:18px; font-weight:700;}
+.empty-note{font-size:13px; color:var(--ink-soft); padding:8px 0;}
 
-  /* ---- Cart drawer ---- */
-  .drawer-overlay{
-    position:fixed; inset:0; background:rgba(4,8,16,0.7); z-index:50; display:none;
-  }
-  .drawer-overlay.open{display:block;}
-  .drawer{
-    position:fixed; top:0; right:0; height:100%; width:min(380px,92vw); background:var(--paper); color:var(--ink);
-    z-index:60; transform:translateX(100%); transition:transform .25s ease; display:flex; flex-direction:column;
-    border-left:1px solid var(--line-soft);
-  }
-  .drawer.open{transform:translateX(0);}
-  .drawer-head{padding:18px; border-bottom:1px solid var(--paper-dim); display:flex; justify-content:space-between; align-items:center;}
-  .drawer-head h4{margin:0; font-size:16px; font-family:'Poppins', sans-serif;}
-  .drawer-close{background:none; border:none; font-size:20px; cursor:pointer; color:var(--ink-soft);}
-  .drawer-items{flex:1; overflow-y:auto; padding:14px 18px;}
-  .drawer-item{display:flex; justify-content:space-between; gap:10px; padding:10px 0; border-bottom:1px solid var(--paper-dim); font-size:13.5px;}
-  .drawer-item .di-name{font-weight:600;}
-  .drawer-item .di-meta{font-family:'Inter', sans-serif; font-size:11px; color:var(--ink-soft);}
-  .di-remove{background:none; border:none; color:var(--danger); font-family:'Inter', sans-serif; font-size:11px; cursor:pointer; padding:0; margin-top:4px;}
-  .drawer-foot{padding:18px; border-top:1px solid var(--paper-dim);}
-  .drawer-total{display:flex; justify-content:space-between; font-family:'Inter', sans-serif; font-size:19px; font-weight:700; margin-bottom:14px;}
-  .checkout-btn{
-    width:100%; background:#25D366; color:#fff; border:none; border-radius:999px; padding:13px;
-    font-family:'Inter', sans-serif; font-weight:600; font-size:14px; cursor:pointer;
-  }
-  .checkout-btn:disabled{background:var(--paper-dim); color:var(--ink-soft); cursor:not-allowed;}
+/* ---- Cart drawer ---- */
+.drawer-overlay{
+  position:fixed; inset:0; background:rgba(4,8,16,0.7); z-index:50; display:none;
+}
+.drawer-overlay.open{display:block;}
+.drawer{
+  position:fixed; top:0; right:0; height:100%; width:min(380px,92vw); background:var(--paper); color:var(--ink);
+  z-index:60; transform:translateX(100%); transition:transform .25s ease; display:flex; flex-direction:column;
+  border-left:1px solid var(--line-soft);
+}
+.drawer.open{transform:translateX(0);}
+.drawer-head{padding:18px; border-bottom:1px solid var(--paper-dim); display:flex; justify-content:space-between; align-items:center;}
+.drawer-head h4{margin:0; font-size:16px; font-family:'Poppins', sans-serif;}
+.drawer-close{background:none; border:none; font-size:20px; cursor:pointer; color:var(--ink-soft);}
+.drawer-items, #checkoutForm{flex:1; overflow-y:auto; padding:14px 18px;}
+.drawer-item{display:flex; justify-content:space-between; gap:10px; padding:10px 0; border-bottom:1px solid var(--paper-dim); font-size:13.5px;}
+.drawer-item .di-name{font-weight:600;}
+.drawer-item .di-meta{font-family:'Inter', sans-serif; font-size:11px; color:var(--ink-soft);}
+.di-remove{background:none; border:none; color:var(--danger); font-family:'Inter', sans-serif; font-size:11px; cursor:pointer; padding:0; margin-top:4px;}
+.drawer-foot{padding:18px; border-top:1px solid var(--paper-dim);}
+.drawer-total{display:flex; justify-content:space-between; font-family:'Inter', sans-serif; font-size:19px; font-weight:700; margin-bottom:14px;}
+.checkout-btn{
+  width:100%; background:var(--accent-grad); color:var(--amber-deep); border:none; border-radius:999px; padding:13px;
+  font-family:'Inter', sans-serif; font-weight:700; font-size:14px; cursor:pointer;
+}
+.checkout-btn:disabled{background:var(--paper-dim); background-image:none; color:var(--ink-soft); cursor:not-allowed;}
+.checkout-btn.secondary{background:transparent; border:1px solid var(--line-soft); color:var(--ink-soft);}
+.checkout-btn.secondary:hover{border-color:var(--line); color:var(--ink);}
+.cf-btn-row{display:flex; gap:10px;}
 
-  footer{padding:40px 24px 60px; text-align:center; color:var(--ink-soft); font-size:12px; font-family:'Inter', sans-serif; border-top:1px solid var(--line-soft);}
+/* ---- Checkout form ---- */
+.cf-group{margin-bottom:18px;}
+.cf-group label{
+  display:block; font-family:'Inter', sans-serif; font-size:11.5px; color:var(--line);
+  margin-bottom:7px; text-transform:uppercase; letter-spacing:0.06em; font-weight:600;
+}
+.cf-group input[type="text"]{
+  width:100%; background:var(--paper-dim); border:1px solid var(--line-soft); border-radius:var(--radius-sm);
+  padding:10px 12px; color:var(--ink); font-family:'Inter', sans-serif; font-size:14px;
+}
+.cf-group input[type="text"]:focus{outline:none; border-color:var(--line);}
+.cf-group input[type="file"]{
+  width:100%; background:var(--paper-dim); border:1px dashed var(--line-soft); border-radius:var(--radius-sm);
+  padding:10px 12px; color:var(--ink-soft); font-family:'Inter', sans-serif; font-size:12.5px;
+}
+.cf-group input[type="file"]:focus{outline:none; border-color:var(--line);}
+.cf-hint{font-family:'Inter', sans-serif; font-size:11px; color:var(--ink-soft); margin-top:6px; line-height:1.5;}
+.cf-file-name{font-family:'Inter', sans-serif; font-size:11.5px; color:#6FE3A8; margin-top:6px; word-break:break-all;}
+.cf-pay-box{
+  background:var(--paper-dim); border:1px solid var(--line-soft); border-radius:var(--radius-sm);
+  padding:14px; text-align:center;
+}
+.cf-pay-box p{margin:0 0 10px; font-size:12.5px; color:var(--ink-soft); font-family:'Inter', sans-serif; line-height:1.5;}
+.cf-pay-link{
+  display:inline-block; background:var(--accent-grad); color:var(--amber-deep); text-decoration:none;
+  font-family:'Inter', sans-serif; font-weight:700; font-size:13.5px; padding:10px 20px; border-radius:999px;
+}
+.cf-pay-link:hover{filter:brightness(1.08);}
+.cf-radio-row{display:flex; gap:18px; font-family:'Inter', sans-serif; font-size:13px; color:var(--ink);}
+.cf-radio-row label{display:flex; align-items:center; gap:6px; cursor:pointer; text-transform:none; font-size:13px; color:var(--ink); margin:0; letter-spacing:0;}
+.cf-radio-row input{width:15px; height:15px; accent-color:var(--navy);}
+.cf-summary{
+  font-family:'Inter', sans-serif; font-size:12.5px; color:var(--ink-soft); line-height:1.7;
+  background:var(--paper-dim); border:1px solid var(--line-soft); border-radius:var(--radius-sm); padding:10px 12px;
+}
+.cf-confirm{display:flex; align-items:flex-start; gap:8px; cursor:pointer; text-transform:none; font-size:13px; color:var(--ink); letter-spacing:0; font-weight:400;}
+.cf-confirm input{margin-top:3px; width:15px; height:15px; accent-color:var(--navy); flex:none;}
+
+/* ---- Shirt / moletom size config ---- */
+.cf-shirt-item{
+  background:var(--paper-dim); border:1px solid var(--line-soft); border-radius:var(--radius-sm);
+  padding:12px; margin-bottom:10px;
+}
+.cf-shirt-item:last-child{margin-bottom:0;}
+.cf-shirt-label{font-family:'Inter', sans-serif; font-weight:600; font-size:13px; margin-bottom:8px; color:var(--ink);}
+.cf-shirt-item select{
+  width:100%; background:var(--paper); border:1px solid var(--line-soft); border-radius:var(--radius-sm);
+  padding:9px 10px; color:var(--ink); font-family:'Inter', sans-serif; font-size:13.5px; margin-top:6px;
+}
+.cf-shirt-item select:focus{outline:none; border-color:var(--line);}
+.cf-shirt-item .cf-radio-row{margin:2px 0 4px; flex-wrap:wrap; row-gap:6px;}
+.cf-shirt-size-note{font-family:'Inter', sans-serif; font-size:10.5px; color:var(--ink-soft); margin-top:4px;}
+
+footer{padding:40px 24px 60px; text-align:center; color:var(--ink-soft); font-size:12px; font-family:'Inter', sans-serif; border-top:1px solid var(--line-soft);}
 </style>
 </head>
 <body>
@@ -264,19 +319,74 @@
   </div>
 </section>
 
-<footer>Feito sob medida para o evento · Preços sujeitos a alteração.</footer>
+<footer>Feito sob medida para o evento </footer>
 
 <!-- CART DRAWER -->
 <div class="drawer-overlay" id="overlay" onclick="closeDrawer()"></div>
 <div class="drawer" id="drawer">
   <div class="drawer-head">
-    <h4>Sua sacola</h4>
+    <h4 id="drawerTitle">Sua sacola</h4>
     <button class="drawer-close" onclick="closeDrawer()">&times;</button>
   </div>
+
   <div class="drawer-items" id="drawerItems"></div>
+
+  <!-- CHECKOUT FORM (hidden until "Finalizar pedido") -->
+  <div id="checkoutForm" style="display:none;">
+    <div class="cf-group">
+      <label for="custName">Nome completo</label>
+      <input type="text" id="custName" placeholder="Seu nome completo">
+    </div>
+    <div class="cf-group">
+      <label for="custCPF">CPF</label>
+      <input type="text" id="custCPF" placeholder="000.000.000-00" maxlength="14">
+    </div>
+    <div class="cf-group">
+      <label>Confirme seu pedido</label>
+      <div class="cf-summary" id="cfSummary"></div>
+    </div>
+    <div class="cf-group" id="shirtSizesGroup" style="display:none;">
+      <label>Modelo e tamanho das camisetas / moletom</label>
+      <div id="shirtSizesList"></div>
+    </div>
+    <div class="cf-group">
+      <label>Pagamento</label>
+      <div class="cf-pay-box">
+        <p>Clique no botão abaixo para pagar o valor total do pedido. Depois de pagar, anexe o comprovante logo abaixo.</p>
+        <a class="cf-pay-link" id="payLink" href="#" target="_blank" rel="noopener">Pagar agora</a>
+      </div>
+    </div>
+    <div class="cf-group">
+      <label for="custComprovante">Comprovante de pagamento (obrigatório)</label>
+      <input type="file" id="custComprovante" accept="image/*,application/pdf">
+      <div class="cf-hint">Anexe o print ou PDF do comprovante (PIX/transferência). Máx. 5MB.</div>
+      <div class="cf-file-name" id="comprovantePreview"></div>
+    </div>
+    <div class="cf-group" id="moletomGroup" style="display:none;">
+      <label>Quer estampar um nome no moletom?</label>
+      <div class="cf-radio-row">
+        <label><input type="radio" name="moletomChoice" value="nao" checked onchange="onMoletomChoice()"> Não</label>
+        <label><input type="radio" name="moletomChoice" value="sim" onchange="onMoletomChoice()"> Sim</label>
+      </div>
+      <input type="text" id="moletomNome" placeholder="Nome para estampar no moletom" style="display:none; margin-top:10px;">
+    </div>
+    <div class="cf-group">
+      <label class="cf-confirm">
+        <input type="checkbox" id="confirmItems">
+        <span>Confirmo que os itens do pedido acima estão corretos.</span>
+      </label>
+    </div>
+  </div>
+
   <div class="drawer-foot">
     <div class="drawer-total"><span>Total</span><span id="drawerTotal">R$ 0,00</span></div>
-    <button class="checkout-btn" id="checkoutBtn" onclick="checkout()">Finalizar pelo WhatsApp</button>
+    <div class="cf-btn-row" id="cartFootBtns">
+      <button class="checkout-btn" id="checkoutBtn" onclick="goToCheckout()">Finalizar pedido</button>
+    </div>
+    <div class="cf-btn-row" id="formFootBtns" style="display:none;">
+      <button class="checkout-btn secondary" onclick="backToCart()">Voltar</button>
+      <button class="checkout-btn" id="submitOrderBtn" onclick="submitOrder()">Confirmar e enviar</button>
+    </div>
   </div>
 </div>
 
@@ -292,20 +402,26 @@ const PRODUCT_IMAGES = {
   engenharia: "Camisetas_satelite.png",
   personalizada: "Camiseta_personalizada.png",
   caneca: "caneca.png",
-  moletom: "moletom_telecom.png"
-  };
+  moletom1: "moletom_telecom.png",
+  moletom2: "ca.png",
+  moletom3: "comp.png",
+  moletom4: "el.png"
+};
 
 const PRODUCTS = [
   {id:'chaveiro', name:'Chaveiro 3D', price:5, addon:true, img:PRODUCT_IMAGES.chaveiro},
   {id:'mochila', name:'Mochila Sacola', price:20, img:PRODUCT_IMAGES.mochila},
   {id:'garrafa', name:'Garrafa', price:30, img:PRODUCT_IMAGES.garrafa},
   {id:'caderneta', name:'Caderneta + Caneta', price:20, img:PRODUCT_IMAGES.bloco},
-  {id:'antena', name:'Camiseta Antena', price:40, img:PRODUCT_IMAGES.antena},
-  {id:'uno', name:'Camiseta Uno', price:50, img:PRODUCT_IMAGES.uno},
-  {id:'engenharia', name:'Camiseta Engenharia', price:60, img:PRODUCT_IMAGES.engenharia},
-  {id:'personalizada', name:'Camiseta Personalizada', price:55, img:PRODUCT_IMAGES.personalizada},
+  {id:'antena', name:'Camiseta Antena', price:40, img:PRODUCT_IMAGES.antena, shirtType:'camiseta'},
+  {id:'uno', name:'Camiseta Uno', price:50, img:PRODUCT_IMAGES.uno, shirtType:'camiseta'},
+  {id:'engenharia', name:'Camiseta Engenharia', price:60, img:PRODUCT_IMAGES.engenharia, shirtType:'camiseta', babyLook:true},
+  {id:'personalizada', name:'Camiseta Personalizada', price:60, img:PRODUCT_IMAGES.personalizada, shirtType:'camiseta'},
   {id:'caneca', name:'Caneca', price:25, img:PRODUCT_IMAGES.caneca},
-  {id:'moletom', name:'Moletom Telecom', price:180, img:PRODUCT_IMAGES.moletom}
+  {id:'moletom', name:'Moletom Telecom', price:180, img:PRODUCT_IMAGES.moletom1, shirtType:'encomenda'},
+  {id:'moletom', name:'Moletom Controle e Automação', price:180, img:PRODUCT_IMAGES.moletom2, shirtType:'encomenda'},
+  {id:'moletom', name:'Moletom Computação', price:180, img:PRODUCT_IMAGES.moletom3, shirtType:'encomenda'},
+  {id:'moletom', name:'Moletom Elétrica', price:180, img:PRODUCT_IMAGES.moletom4, shirtType:'encomenda'}
 ];
 
 const KITS = [
@@ -328,19 +444,77 @@ const KITS = [
 ];
 
 const CASCADE_DISCOUNT = 5;
+const MOLETOM_LABEL = 'Moletom Telecom',
+const MOLETOM_LABEL = 'Moletom Controle e Automação',
+const MOLETOM_LABEL = 'Moletom Computação',
+const MOLETOM_LABEL = 'Moletom Elétrica';
+
+// ---------- SHIRT / MOLETOM SIZE CONFIG ----------
+// Para cada kit fixo que inclui camiseta, quais modelos ela pode escolher (somente os do respectivo kit).
+const KIT_SHIRT_CHOICES = {
+  evento: ['uno', 'antena'],
+  identidade: ['personalizada', 'uno', 'antena'],
+  completo: ['personalizada', 'uno', 'antena']
+};
+
+// Info de cada modelo que precisa de tamanho (camiseta normal/baby look ou moletom/encomenda).
+const DESIGN_INFO = {};
+PRODUCTS.forEach(p => { if(p.shirtType){ DESIGN_INFO[p.id] = {name: p.name, shirtType: p.shirtType, babyLook: !!p.babyLook}; } });
+
+const SIZE_SETS = {
+  camiseta_normal: ['PP','P','M','G','GG'],
+  camiseta_baby: ['P','M','G'],
+  encomenda: ['P','M','G','GG', 'ESP1', 'ESP2'] // moletom (sob encomenda)
+};
+
+// >>> Cole aqui o seu link de pagamento (Mercado Pago, PicPay, PIX copia-e-cola, etc).
+// Modelo de exemplo abaixo — troque pela URL real.
+const PAYMENT_LINK = '00020126440014br.gov.bcb.pix0122petelecomufu@gmail.com5204000053039865802BR5925GABRIEL INACIO DE ALMEIDA6009Sao Paulo62290525REC6AA07FAC66DBC5001778556304BD8E';
 const fmt = v => 'R$ ' + v.toFixed(2).replace('.', ',');
+
+// >>> Cole aqui a URL e a chave "anon" (pública) do seu projeto Supabase.
+// Painel do Supabase → Project Settings → API.
+// A chave "anon" é feita para ficar exposta no front-end — a segurança fica nas
+// políticas de RLS (Row Level Security) criadas junto com as tabelas.
+const SUPABASE_URL = 'https://SEU-PROJETO.supabase.co';
+const SUPABASE_ANON_KEY = 'SUA_CHAVE_ANON_AQUI';
+const COMPROVANTES_BUCKET = 'comprovantes';
+
+const supabaseClient = (SUPABASE_URL.startsWith('http') && !SUPABASE_URL.includes('SEU-PROJETO'))
+  ? supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+  : null;
 
 // ---------- CART ----------
 let cart = []; // {label, price, meta}
 
-function addToCart(label, price, meta){
-  cart.push({label, price, meta});
+function addToCart(label, price, meta, shirtItems){
+  cart.push({label, price, meta, shirtItems: shirtItems || []});
   renderCart();
   openDrawer();
+}
+
+// Item avulso: se for camiseta/moletom, já sabemos o modelo — só falta corte/tamanho.
+function addProductToCart(id){
+  const p = PRODUCTS.find(x => x.id === id);
+  if(!p) return;
+  const shirtItems = p.shirtType ? [{id: p.id, label: p.name, chooseDesign: false}] : [];
+  addToCart(p.name, p.price, undefined, shirtItems);
+}
+
+// Kit fixo: se o kit envolve escolha de camiseta, mostramos apenas os modelos daquele kit.
+function addKitToCart(id){
+  const k = KITS.find(x => x.id === id);
+  if(!k) return;
+  const choices = KIT_SHIRT_CHOICES[k.id];
+  const shirtItems = choices ? [{id: null, label: 'Camiseta do ' + k.name, chooseDesign: true, designOptions: choices}] : [];
+  addToCart(k.name, k.price, 'kit fixo', shirtItems);
 }
 function removeFromCart(idx){
   cart.splice(idx,1);
   renderCart();
+}
+function cartHasMoletom(){
+  return cart.some(c => c.label === MOLETOM_LABEL);
 }
 function renderCart(){
   document.getElementById('cartCount').textContent = cart.length;
@@ -369,16 +543,7 @@ function openDrawer(){
 function closeDrawer(){
   document.getElementById('drawer').classList.remove('open');
   document.getElementById('overlay').classList.remove('open');
-}
-function checkout(){
-  if(cart.length === 0) return;
-  let msg = 'Olá! Quero fazer o seguinte pedido:%0A%0A';
-  cart.forEach(c=>{
-    msg += `• ${c.label}${c.meta ? ' ('+c.meta+')' : ''} — ${fmt(c.price)}%0A`;
-  });
-  const total = cart.reduce((s,c)=>s+c.price,0);
-  msg += `%0ATotal: ${fmt(total)}`;
-  window.open(`https://wa.me/?text=${msg}`, '_blank');
+  backToCart();
 }
 
 // ---------- CATALOG RENDER ----------
@@ -391,7 +556,7 @@ function renderCatalog(){
       <div class="meta mono">${p.addon ? 'add-on premium' : 'item avulso'}</div>
       <div class="price-row">
         <span class="price">${fmt(p.price)}</span>
-        <button class="add-btn" onclick='addToCart(${JSON.stringify(p.name)}, ${p.price})'>Adicionar</button>
+        <button class="add-btn" onclick="addProductToCart('${p.id}')">Adicionar</button>
       </div>
     </div>`).join('');
 }
@@ -399,9 +564,7 @@ function renderCatalog(){
 // ---------- KITS RENDER ----------
 function renderKits(){
   const wrap = document.getElementById('kitsList');
-  wrap.innerHTML = KITS.map(k=>{
-    const raw = k.items.reduce((s)=>s, 0); // placeholder, real soma displayed as strategy text
-    return `
+  wrap.innerHTML = KITS.map(k=>`
     <div class="kit-card">
       <div>
         <h4>${k.name}</h4>
@@ -409,14 +572,13 @@ function renderKits(){
       </div>
       <div class="kit-buy">
         <span class="now">${fmt(k.price)}</span>
-        <button class="add-btn" onclick='addToCart(${JSON.stringify(k.name)}, ${k.price}, "kit fixo")'>Adicionar kit</button>
+        <button class="add-btn" onclick="addKitToCart('${k.id}')">Adicionar kit</button>
       </div>
-    </div>`;
-  }).join('');
+    </div>`).join('');
 }
 
 // ---------- CUSTOM BUILDER ----------
-let selected = {}; // id -> qty (0 or 1 for simplicity, chaveiro can be multiple)
+let selected = {}; // id -> true
 
 function renderPickList(){
   const wrap = document.getElementById('pickList');
@@ -452,7 +614,7 @@ function updateBreakdown(){
     const discounted = idx >= 2;
     const finalPrice = discounted ? Math.max(p.price - CASCADE_DISCOUNT, 0) : p.price;
     total += finalPrice;
-    html += `<div class="b-line"><span>${p.name}</span><span class="${discounted?'off':''} mono">${discounted ? '−R$5 → ' : ''}${fmt(finalPrice)}</span></div>`;
+    html += `<div class="b-line"><span>${p.name}</span><span class="mono${discounted ? ' off' : ''}">${discounted ? '−R$5 → ' : ''}${fmt(finalPrice)}</span></div>`;
   });
   addons.forEach(p => {
     total += p.price;
@@ -471,11 +633,285 @@ function addCustomKit(){
     alert('Selecione ao menos um item para montar o kit.');
     return;
   }
-  addToCart('Kit personalizado', total, names);
-  // reset selections
+  const shirtItems = Object.keys(selected)
+    .map(id => PRODUCTS.find(p => p.id === id))
+    .filter(p => p && p.shirtType)
+    .map(p => ({id: p.id, label: p.name, chooseDesign: false}));
+  addToCart('Kit personalizado', total, names, shirtItems);
   selected = {};
   document.querySelectorAll('#pickList input[type=checkbox]').forEach(cb => cb.checked = false);
   updateBreakdown();
+}
+
+// ---------- CHECKOUT FLOW ----------
+function goToCheckout(){
+  if(cart.length === 0) return;
+
+  document.getElementById('drawerItems').style.display = 'none';
+  document.getElementById('checkoutForm').style.display = 'block';
+  document.getElementById('cartFootBtns').style.display = 'none';
+  document.getElementById('formFootBtns').style.display = 'flex';
+  document.getElementById('drawerTitle').textContent = 'Finalizar pedido';
+
+  document.getElementById('moletomGroup').style.display = cartHasMoletom() ? 'block' : 'none';
+
+  const summary = document.getElementById('cfSummary');
+  summary.innerHTML = cart.map(c => `<div>• ${c.label}${c.meta ? ' ('+c.meta+')' : ''} — ${fmt(c.price)}</div>`).join('');
+
+  buildShirtSizesSection();
+
+  document.getElementById('payLink').href = PAYMENT_LINK;
+}
+
+// ---------- SHIRT / MOLETOM SIZE SECTION (fluxo adaptativo) ----------
+function sizeOptionsHTML(sizes){
+  return sizes.map(s => `<option value="${s}">${s}</option>`).join('');
+}
+
+function corteAndSizeHTML(uid){
+  return `
+    <div class="cf-radio-row">
+      <label><input type="radio" name="${uid}_corte" value="normal" checked onchange="onCorteChange('${uid}')"> Normal (PP ao GG)</label>
+      <label><input type="radio" name="${uid}_corte" value="baby" onchange="onCorteChange('${uid}')"> Baby look (P ao G)</label>
+    </div>
+    <select id="${uid}_size">${sizeOptionsHTML(SIZE_SETS.camiseta_normal)}</select>`;
+}
+
+function sizeOnlyHTML(uid, sizes, note){
+  return `<select id="${uid}_size">${sizeOptionsHTML(sizes)}</select>${note ? `<div class="cf-shirt-size-note">${note}</div>` : ''}`;
+}
+
+function onCorteChange(uid){
+  const checked = document.querySelector(`input[name=${uid}_corte]:checked`);
+  const corte = checked ? checked.value : 'normal';
+  const sizes = corte === 'baby' ? SIZE_SETS.camiseta_baby : SIZE_SETS.camiseta_normal;
+  document.getElementById(`${uid}_size`).innerHTML = sizeOptionsHTML(sizes);
+}
+
+function onShirtDesignChange(i, j){
+  const uid = `s_${i}_${j}`;
+  const designId = document.getElementById(`${uid}_design`).value;
+  const area = document.getElementById(`${uid}_sizearea`);
+  if(!designId){ area.innerHTML = ''; return; }
+  const info = DESIGN_INFO[designId];
+  if(info.shirtType === 'camiseta'){
+    area.innerHTML = info.babyLook ? corteAndSizeHTML(uid) : sizeOnlyHTML(uid, SIZE_SETS.camiseta_normal);
+  } else {
+    area.innerHTML = sizeOnlyHTML(uid, SIZE_SETS.encomenda, 'Modelo sob encomenda: tamanhos de P a GG.');
+  }
+}
+
+function renderShirtItemConfig(i, j, item){
+  const uid = `s_${i}_${j}`;
+  let inner = '';
+  if(item.chooseDesign){
+    inner += `<select id="${uid}_design" onchange="onShirtDesignChange(${i},${j})">`;
+    inner += `<option value="">Selecione o modelo da camiseta</option>`;
+    item.designOptions.forEach(id => {
+      inner += `<option value="${id}">${DESIGN_INFO[id].name}</option>`;
+    });
+    inner += `</select><div id="${uid}_sizearea"></div>`;
+  } else {
+    const info = DESIGN_INFO[item.id];
+    if(info.shirtType === 'camiseta'){
+      inner = info.babyLook ? corteAndSizeHTML(uid) : sizeOnlyHTML(uid, SIZE_SETS.camiseta_normal);
+    } else {
+      inner = sizeOnlyHTML(uid, SIZE_SETS.encomenda, 'Modelo sob encomenda: tamanhos de P a GG.');
+    }
+  }
+  return `<div class="cf-shirt-item"><div class="cf-shirt-label">${item.label}</div>${inner}</div>`;
+}
+
+function buildShirtSizesSection(){
+  const list = document.getElementById('shirtSizesList');
+  let html = '';
+  let any = false;
+  cart.forEach((c, i) => {
+    (c.shirtItems || []).forEach((item, j) => {
+      any = true;
+      html += renderShirtItemConfig(i, j, item);
+    });
+  });
+  list.innerHTML = html;
+  document.getElementById('shirtSizesGroup').style.display = any ? 'block' : 'none';
+  return any;
+}
+
+// Reúne as escolhas de modelo/corte/tamanho feitas no checkout. Retorna {valid, text}.
+function collectShirtSelections(){
+  let valid = true;
+  const parts = [];
+  cart.forEach((c, i) => {
+    (c.shirtItems || []).forEach((item, j) => {
+      const uid = `s_${i}_${j}`;
+      let designId = item.id;
+      let designLabel = item.label;
+      if(item.chooseDesign){
+        const sel = document.getElementById(`${uid}_design`);
+        designId = sel ? sel.value : '';
+        if(!designId){ valid = false; return; }
+        designLabel = DESIGN_INFO[designId].name;
+      }
+      const sizeSel = document.getElementById(`${uid}_size`);
+      if(!sizeSel || !sizeSel.value){ valid = false; return; }
+      let corteLabel = '';
+      if(DESIGN_INFO[designId] && DESIGN_INFO[designId].shirtType === 'camiseta' && DESIGN_INFO[designId].babyLook){
+        const corteChecked = document.querySelector(`input[name=${uid}_corte]:checked`);
+        corteLabel = corteChecked && corteChecked.value === 'baby' ? 'Baby look' : 'Normal';
+      }
+      parts.push(`${designLabel}${corteLabel ? ' ('+corteLabel+')' : ''} — ${sizeSel.value}`);
+    });
+  });
+  return {valid, text: parts.join(' | ')};
+}
+
+function backToCart(){
+  document.getElementById('drawerItems').style.display = 'block';
+  document.getElementById('checkoutForm').style.display = 'none';
+  document.getElementById('cartFootBtns').style.display = 'flex';
+  document.getElementById('formFootBtns').style.display = 'none';
+  document.getElementById('drawerTitle').textContent = 'Sua sacola';
+}
+
+function onMoletomChoice(){
+  const sim = document.querySelector('input[name=moletomChoice]:checked').value === 'sim';
+  document.getElementById('moletomNome').style.display = sim ? 'block' : 'none';
+}
+
+function formatCPF(v){
+  v = v.replace(/\D/g,'').slice(0,11);
+  v = v.replace(/(\d{3})(\d)/, '$1.$2');
+  v = v.replace(/(\d{3})(\d)/, '$1.$2');
+  v = v.replace(/(\d{3})(\d{1,2})$/, '$1-$2');
+  return v;
+}
+document.addEventListener('input', (e)=>{
+  if(e.target && e.target.id === 'custCPF'){
+    e.target.value = formatCPF(e.target.value);
+  }
+});
+
+document.addEventListener('change', (e)=>{
+  if(e.target && e.target.id === 'custComprovante'){
+    const f = e.target.files[0];
+    const preview = document.getElementById('comprovantePreview');
+    preview.textContent = f ? `Selecionado: ${f.name} (${(f.size/1024/1024).toFixed(2)} MB)` : '';
+  }
+});
+
+const MAX_COMPROVANTE_SIZE = 5 * 1024 * 1024; // 5MB
+
+async function submitOrder(){
+  const nome = document.getElementById('custName').value.trim();
+  const cpf = document.getElementById('custCPF').value.trim();
+  const comprovanteInput = document.getElementById('custComprovante');
+  const comprovanteFile = comprovanteInput.files[0];
+
+  if(!nome){ alert('Preencha seu nome completo.'); return; }
+  if(cpf.replace(/\D/g,'').length !== 11){ alert('Preencha um CPF válido.'); return; }
+  if(!comprovanteFile){ alert('Anexe o comprovante de pagamento antes de enviar.'); return; }
+  if(comprovanteFile.size > MAX_COMPROVANTE_SIZE){ alert('O comprovante deve ter no máximo 5MB.'); return; }
+  if(!document.getElementById('confirmItems').checked){
+    alert('Confirme os itens do pedido antes de enviar.');
+    return;
+  }
+
+  const shirtSel = collectShirtSelections();
+  if(!shirtSel.valid){
+    alert('Selecione o modelo e o tamanho de todas as camisetas/moletom do pedido.');
+    return;
+  }
+
+  let moletomPedido = '';
+  let moletomNome = '';
+  if(cartHasMoletom()){
+    const choice = document.querySelector('input[name=moletomChoice]:checked');
+    moletomPedido = (choice && choice.value === 'sim') ? 'Sim' : 'Não';
+    if(moletomPedido === 'Sim'){
+      moletomNome = document.getElementById('moletomNome').value.trim();
+      if(!moletomNome){ alert('Digite o nome para estampar no moletom.'); return; }
+    }
+  }
+
+  if(!supabaseClient){
+    alert('A conexão com o banco de dados ainda não foi configurada. Avise o responsável pelo site.');
+    return;
+  }
+
+  const itensTexto = cart.map(c => `${c.label}${c.meta ? ' ('+c.meta+')' : ''} — ${fmt(c.price)}`).join(' | ');
+  const total = cart.reduce((s,c)=>s+c.price,0);
+
+  const submitBtn = document.getElementById('submitOrderBtn');
+  const originalLabel = submitBtn ? submitBtn.textContent : '';
+  if(submitBtn){ submitBtn.disabled = true; submitBtn.textContent = 'Enviando...'; }
+
+  try{
+    // ---- 1) sobe o comprovante para o Supabase Storage ----
+    const ext = (comprovanteFile.name.split('.').pop() || 'bin').toLowerCase();
+    const caminhoArquivo = `${cpf.replace(/\D/g,'')}/${Date.now()}.${ext}`;
+
+    const { error: uploadError } = await supabaseClient
+      .storage
+      .from(COMPROVANTES_BUCKET)
+      .upload(caminhoArquivo, comprovanteFile, { contentType: comprovanteFile.type, upsert: false });
+
+    if(uploadError) throw uploadError;
+
+    // ---- 2) grava o pedido na tabela "pedidos" ----
+    const { data: pedidoInserido, error: pedidoError } = await supabaseClient
+      .from('pedidos')
+      .insert({
+        nome_cliente: nome,
+        cpf: cpf,
+        itens_resumo: itensTexto,
+        camisetas_tamanhos: shirtSel.text,
+        total: total,
+        moletom_pedido: moletomPedido,
+        moletom_nome: moletomNome,
+        comprovante_path: caminhoArquivo,
+        comprovante_nome: comprovanteFile.name,
+        status: 'pendente'
+      })
+      .select()
+      .single();
+
+    if(pedidoError) throw pedidoError;
+
+    // ---- 3) grava cada item do carrinho em "pedido_itens", ligado ao pedido acima ----
+    const linhasItens = cart.map(c => ({
+      pedido_id: pedidoInserido.id,
+      label: c.label,
+      price: c.price,
+      meta: c.meta || null
+    }));
+
+    const { error: itensError } = await supabaseClient.from('pedido_itens').insert(linhasItens);
+    if(itensError) throw itensError;
+
+    alert('Pedido enviado com sucesso! Obrigado.');
+
+    // ---- reset ----
+    cart = [];
+    renderCart();
+    document.getElementById('custName').value = '';
+    document.getElementById('custCPF').value = '';
+    document.getElementById('confirmItems').checked = false;
+    comprovanteInput.value = '';
+    document.getElementById('comprovantePreview').textContent = '';
+    const naoRadio = document.querySelector('input[name=moletomChoice][value=nao]');
+    if(naoRadio) naoRadio.checked = true;
+    document.getElementById('moletomNome').value = '';
+    document.getElementById('moletomNome').style.display = 'none';
+    document.getElementById('shirtSizesList').innerHTML = '';
+    document.getElementById('shirtSizesGroup').style.display = 'none';
+    backToCart();
+    closeDrawer();
+  } catch(err){
+    console.error('Erro ao enviar pedido:', err);
+    alert('Não foi possível enviar o pedido agora. Verifique sua conexão e tente novamente.\n' + (err && err.message ? err.message : ''));
+  } finally {
+    if(submitBtn){ submitBtn.disabled = false; submitBtn.textContent = originalLabel || 'Confirmar e enviar'; }
+  }
 }
 
 // ---------- INIT ----------
@@ -490,7 +926,7 @@ renderCart();
   if(!canvas) return;
   const ctx = canvas.getContext('2d');
   const reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const COLORS = ['#3FD8FF', '#4F8CFF', '#8FE3FF', '#D7E4EE']; // ciano, azul, ciano claro, branco-acinzentado
+  const COLORS = ['#3FD8FF', '#4F8CFF', '#8FE3FF', '#D7E4EE'];
   const MAX_DIST = 140;
   let w, h, dpr, particles = [];
 
